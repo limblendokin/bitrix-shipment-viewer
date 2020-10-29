@@ -8,7 +8,19 @@ const getShipmentList = () => {
       "filter[allowDelivery]":"Y",
       "select[]":["id", "deducted", "deliveryName", "statusId", "orderId", "trackingNumber"]
     }
-  }).then(res => console.log(res.data));
+  }).then(res => {
+    var shipments = res.data.result;
+    var orderIds =[];
+    for(let i=0; shipments.length; i++){
+      orderIds.push(shipments[i]['orderId']);
+    }
+    axios.get(`${baseUrl}sale.basketItem.list`,{
+      params:{
+        'filter[orderId][]': orderIds,
+        'select[]':["detailPageUrl", "measureName", "name", "quantity"]
+      }
+    }).then(res=>console.log(res.data))
+  });
 }
 
 module.exports = {getShipmentList:getShipmentList};
