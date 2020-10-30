@@ -3,10 +3,10 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 var passport = require('passport');
 var crypto = require('crypto');
+const b24api = require('./b24api');
 var LocalStrategy = require('passport-local').Strategy;
 // Package documentation - https://www.npmjs.com/package/connect-mongo
 const MongoStore = require('connect-mongo')(session);
-require('./b24api').getShipmentList();
 
 /**
  * -------------- GENERAL SETUP ----------------
@@ -241,9 +241,15 @@ app.get('/login-success', (req, res, next) => {
 app.get('/login-failure', (req, res, next) => {
     res.send('You entered the wrong password.');
 });
-
-
-
+app.get('/api/shipment', (req,res,next)=>{
+    if(req.isAuthenticated()){
+        b24api.getShipmentList().then(result => res.send(result));
+    }
+    else{
+        
+        res.send('<h1>You are not authenticated</h1>');
+    }
+})
 
 
 
