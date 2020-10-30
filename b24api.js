@@ -6,7 +6,7 @@ const getShipmentList = async () => {
   var shipments = await axios.get(`${baseUrl}sale.shipment.list`, {
     params:{
       "filter[allowDelivery]":"Y",
-      "select":["id", "deducted", "deliveryName", "statusId", "orderId", "trackingNumber", "deliveryId"]
+      "select":["id", "deducted", "deliveryName", "statusId", "orderId", "trackingNumber", "deliveryId", "allowDelivery"]
     }
   });
   shipments = shipments.data.result.shipments;
@@ -22,6 +22,12 @@ const getShipmentList = async () => {
       'select':["detailPageUrl", "measureName", "name", "quantity", "orderId"]
     }
   });
+  // var trackingNumber = await axios.get(`${baseUrl}sale.order.list`,{
+  //   params: {
+  //     'filter[id]':orderIds,
+  //     'select': []
+  //   }
+  // })
   
   items = items.data.result.basketItems;
   console.log(items);
@@ -30,6 +36,8 @@ const getShipmentList = async () => {
     var basket = items.filter(item => item.orderId == orderId);
     shipments[i].items = basket;
   }
+
+
   return shipments;
 }
 

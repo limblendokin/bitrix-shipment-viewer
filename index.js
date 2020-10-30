@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
 var passport = require('passport');
+const cors = require('cors');
+const helmet = require('helmet');
 var crypto = require('crypto');
 const b24api = require('./b24api');
 var LocalStrategy = require('passport-local').Strategy;
@@ -132,7 +134,8 @@ app.use(session({
         maxAge: 1000 * 30
     }
 }));
-
+app.use(cors());
+app.use(helmet());
 
 
 
@@ -257,7 +260,7 @@ app.get('/api/shipment', (req,res,next)=>{
  * -------------- SERVER ----------------
  */
 // Server listens on http://localhost:3000
-app.listen(3000);
+app.listen(4000);
 
 
 
