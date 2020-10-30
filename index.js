@@ -17,6 +17,11 @@ const MongoStore = require('connect-mongo')(session);
 require('dotenv').config();
 // Create the Express application
 var app = express();
+app.use(helmet());
+// app.use(cors({
+//     origin: 'http://localhost:4000/login',
+//     credentials:true
+// }));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 /**
@@ -126,7 +131,6 @@ const sessionStore = new MongoStore({ mongooseConnection: connection, collection
  */
 app.use(session({
     secret: process.env.SECRET,
-    //secret: 'some secret',
     resave: false,
     saveUninitialized: true,
     store: sessionStore,
@@ -134,8 +138,6 @@ app.use(session({
         maxAge: 1000 * 30
     }
 }));
-app.use(cors());
-app.use(helmet());
 
 
 
@@ -173,7 +175,7 @@ app.get('/', (req, res, next) => {
     res.send('<h1>Home</h1>');
 });
 // When you visit http://localhost:3000/login, you will see "Login Page"
-app.get('/login', (req, res, next) => {
+app.get('/api/login', (req, res, next) => {
    
     const form = '<h1>Login Page</h1><form method="POST" action="/login">\
     Enter Username:<br><input type="text" name="username">\
@@ -182,11 +184,11 @@ app.get('/login', (req, res, next) => {
     res.send(form);
 });
 // Since we are using the passport.authenticate() method, we should be redirected no matter what 
-app.post('/login', passport.authenticate('local', { failureRedirect: '/login-failure', successRedirect: 'login-success' }), (err, req, res, next) => {
-    if (err) next(err);
+app.post('/api/login', passport.authenticate('local'), (req, res, next) => {
+    res.json(req.user.username)
 });
 // When you visit http://localhost:3000/register, you will see "Register Page"
-app.get('/register', (req, res, next) => {
+app.get('/api/register', (req, res, next) => {
   if(req.isAuthenticated()){
     const form = '<h1>Register Page</h1><form method="post" action="register">\
                     Enter Username:<br><input type="text" name="username">\
@@ -197,7 +199,7 @@ app.get('/register', (req, res, next) => {
     res.send('<h1>You are not authenticated</h1>');
   }
 });
-app.post('/register', (req, res, next) => {
+app.post('/api/register', (req, res, next) => {
   if(req.isAuthenticated()){
     const saltHash = genPassword(req.body.password);
     
@@ -224,7 +226,7 @@ app.post('/register', (req, res, next) => {
  * 
  * Also, look up what behaviour express session has without a maxage set
  */
-app.get('/protected-route', (req, res, next) => {
+app.get('/api/protected-route', (req, res, next) => {
     console.log(req.session);
     if (req.isAuthenticated()) {
         res.send('<h1>You are authenticated</h1>');
@@ -233,24 +235,24 @@ app.get('/protected-route', (req, res, next) => {
     }
 });
 // Visiting this route logs the user out
-app.get('/logout', (req, res, next) => {
+app.get('/api/logout', (req, res, next) => {
     req.logout();
     res.redirect('/login');
 });
-app.get('/login-success', (req, res, next) => {
+app.get('/api/login-success', (req, res, next) => {
     console.log(req.session);
     res.send('You successfully logged in.');
 });
-app.get('/login-failure', (req, res, next) => {
+app.get('/api/login-failure', (req, res, next) => {
     res.send('You entered the wrong password.');
 });
-app.get('/api/shipment', (req,res,next)=>{
+app.get('/api/shipment',  (req,res,next)=>{
     if(req.isAuthenticated()){
         b24api.getShipmentList().then(result => res.send(result));
     }
     else{
         
-        res.send('<h1>You are not authenticated</h1>');
+        res.status(403).json({err:'err'});
     }
 })
 
@@ -260,7 +262,7 @@ app.get('/api/shipment', (req,res,next)=>{
  * -------------- SERVER ----------------
  */
 // Server listens on http://localhost:3000
-app.listen(4000);
+app.listen(4000, ()=>console.log('listening on 4000'));
 
 
 
