@@ -175,14 +175,14 @@ app.get('/', (req, res, next) => {
     res.send('<h1>Home</h1>');
 });
 // When you visit http://localhost:3000/login, you will see "Login Page"
-app.get('/api/login', (req, res, next) => {
+// app.get('/api/login', (req, res, next) => {
    
-    const form = '<h1>Login Page</h1><form method="POST" action="/login">\
-    Enter Username:<br><input type="text" name="username">\
-    <br>Enter Password:<br><input type="password" name="password">\
-    <br><br><input type="submit" value="Submit"></form>';
-    res.send(form);
-});
+//     const form = '<h1>Login Page</h1><form method="POST" action="/login">\
+//     Enter Username:<br><input type="text" name="username">\
+//     <br>Enter Password:<br><input type="password" name="password">\
+//     <br><br><input type="submit" value="Submit"></form>';
+//     res.send(form);
+// });
 // Since we are using the passport.authenticate() method, we should be redirected no matter what 
 app.post('/api/login', passport.authenticate('local'), (req, res, next) => {
     res.json(req.user.username)
@@ -261,8 +261,8 @@ app.get('/api/shipment',  (req,res,next)=>{
 /**
  * -------------- SERVER ----------------
  */
-// Server listens on http://localhost:3000
-app.listen(4000, ()=>console.log('listening on 4000'));
+// Server listens on http://localhost:4000
+app.listen(4001, ()=>console.log('listening on 4000'));
 
 
 

@@ -14,7 +14,8 @@ function App() {
     fetch(
       `/api/shipment`,
       {
-        headers: { 'Content-Type': 'application/json'}
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json',}
       }
     ).then(res => res.json()).then(data => {
       if(data.err) data = [];

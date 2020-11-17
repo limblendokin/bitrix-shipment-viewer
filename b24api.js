@@ -8,6 +8,7 @@ const getShipmentList = async () => {
     shipments = await axios.get(`${baseUrl}sale.shipment.list`, {
       params:{
         "filter[allowDelivery]":"Y",
+        "filter[deducted]":"N",
         "select":["id", "deducted", "deliveryName", "statusId", "orderId", "trackingNumber", "deliveryId", "allowDelivery"]
       }
     });
