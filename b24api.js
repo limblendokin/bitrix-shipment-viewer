@@ -9,6 +9,7 @@ const getShipmentList = async () => {
       params:{
         "filter[allowDelivery]":"Y",
         "filter[deducted]":"N",
+        "filter[statusId]":["DN"],
         "select":["id", "deducted", "deliveryName", "statusId", "orderId", "trackingNumber", "deliveryId", "allowDelivery"]
       }
     });
@@ -42,7 +43,6 @@ const getShipmentList = async () => {
     console.log(err);
 
   }
-
   return shipments;
 }
 
@@ -73,5 +73,4 @@ const setStage = async (id, stageId, allowDelivery, deducted, deliveryId) =>{
     return res;
   });
 }
-
 module.exports = {getShipmentList:getShipmentList};
