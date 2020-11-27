@@ -171,9 +171,9 @@ app.use(passport.session());
 /**
  * -------------- ROUTES ----------------
  */
-app.get('/', (req, res, next) => {
-    res.send('<h1>Home</h1>');
-});
+// app.get('/', (req, res, next) => {
+//     res.send('<h1>Home</h1>');
+// });
 // When you visit http://localhost:3000/login, you will see "Login Page"
 // app.get('/api/login', (req, res, next) => {
    
@@ -226,14 +226,14 @@ app.post('/api/register', (req, res, next) => {
  * 
  * Also, look up what behaviour express session has without a maxage set
  */
-app.get('/api/protected-route', (req, res, next) => {
-    console.log(req.session);
-    if (req.isAuthenticated()) {
-        res.send('<h1>You are authenticated</h1>');
-    } else {
-        res.send('<h1>You are not authenticated</h1>');
-    }
-});
+// app.get('/api/protected-route', (req, res, next) => {
+//     console.log(req.session);
+//     if (req.isAuthenticated()) {
+//         res.send('<h1>You are authenticated</h1>');
+//     } else {
+//         res.send('<h1>You are not authenticated</h1>');
+//     }
+// });
 // Visiting this route logs the user out
 app.get('/api/logout', (req, res, next) => {
     req.logout();
