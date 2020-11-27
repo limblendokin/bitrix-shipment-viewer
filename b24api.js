@@ -47,6 +47,31 @@ const getShipmentList = async () => {
 }
 
 
+const getPayedOrders = async () => {
+  var orders = [];
+  try{
+    orders = await axios.get(`${baseUrl}sale.order.list`, {
+      params:{
+        "filter[payed]":"Y",
+        "select":["id", "dateInsert", "price"]
+      }
+    });
+    orders = orders.data.result.orders;
+    // var trackingNumber = await axios.get(`${baseUrl}sale.order.list`,{
+    //   params: {
+    //     'filter[id]':orderIds,
+    //     'select': []
+    //   }
+    // })
+    
+  }
+  catch(err){
+    console.log(err);
+
+  }
+  return orders;
+}
+
 const setDeducted = async (id, deducted, allowDelivery, deliveryId) => {
   axios.get(`${baseUrl}sale.shipment.update`, {
     params: {
@@ -73,4 +98,4 @@ const setStage = async (id, stageId, allowDelivery, deducted, deliveryId) =>{
     return res;
   });
 }
-module.exports = {getShipmentList:getShipmentList};
+module.exports = {getShipmentList:getShipmentList, getPayedOrders: getPayedOrders};

@@ -8,6 +8,7 @@ function App() {
   const [username, setUsername] = React.useState("");
   const [userPassword, setUserPassword] = React.useState("");
   const [shipments, setShipments] = React.useState([]);
+  const [orders, setOrders] = React.useState([]);
   const smola20url = 'https://smola20.ru';
   const [activeTab, setActiveTab] = useState('1');
   const [items, setItems] = React.useState([]);
@@ -16,38 +17,51 @@ function App() {
   }
 
   useEffect(() => {
-  const fetchData = async () => {
-    fetch(
-      `/api/shipment`,
-      {
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json',}
-      }
-    ).then(res => res.json()).then(data => {
-      if(data.err) data = [];
-      setShipments(data);
-      var itemsArr=[];
-      for(let i = 0; i<data.length;i++){
-        var order = data[i];
-        for(let j = 0; j<order.items.length; j++){
-          let item = order.items[j]; 
-          let found = itemsArr.find(x => x.name===item.name);
-          if(found){
-            found.quantity+=Number.parseInt(item.quantity);
-          }
-          else{
-            var newItem = JSON.parse(JSON.stringify(item));
-            newItem.quantity = Number.parseInt(newItem.quantity);
-            itemsArr.push(newItem);
 
+    const fetchData = async () => {
+      fetch(
+        `/api/shipment`,
+        {
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json',}
+        }
+      ).then(res => res.json()).then(data => {
+        if(data.err) data = [];
+        setShipments(data);
+        var itemsArr=[];
+        for(let i = 0; i<data.length;i++){
+          var order = data[i];
+          for(let j = 0; j<order.items.length; j++){
+            let item = order.items[j]; 
+            let found = itemsArr.find(x => x.name===item.name);
+            if(found){
+              found.quantity+=Number.parseInt(item.quantity);
+            }
+            else{
+              var newItem = JSON.parse(JSON.stringify(item));
+              newItem.quantity = Number.parseInt(newItem.quantity);
+              itemsArr.push(newItem);
+
+            }
           }
         }
-      }
-      setItems(itemsArr);
-    });
-  };
-  fetchData();
-}, []);
+        setItems(itemsArr);
+      });
+    };
+    const fetchOrders = async () => {
+      fetch(
+        `/api/orders`,
+        {
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json',}
+        }
+      ).then(res => res.json()).then(data => {
+        setOrders(data?data:[]);
+      })
+    }
+    fetchData();
+    fetchOrders();
+  }, []);
   return (
     <div>
       <Form inline className="m-3" onSubmit={async e=>{
@@ -88,6 +102,14 @@ function App() {
             onClick={() => { toggle('2'); }}
           >
             Товары в отгрузках
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink
+            className={classnames({ active: activeTab === '3' })}
+            onClick={() => { toggle('3'); }}
+          >
+            Оплаченные заказы
           </NavLink>
         </NavItem>
       </Nav>
@@ -148,6 +170,28 @@ function App() {
               ))}
             </tbody>
           </Table>
+        </TabPane>
+        <TabPane tabId="3">
+          {/* <Table hover>
+            <thead>
+              <tr>
+                <th>Номер заказа</th>
+                <th>Дата</th>
+                <th>Сумма</th>
+
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map(order => (
+
+                <tr key={order.id}>
+                  <td>812{order.id}</td>
+                  <td>{order.dateInsert}</td>
+                  <td>{order.price}</td>
+                </tr>
+                    ))}
+            </tbody>
+          </Table> */}
         </TabPane>
       </TabContent>
     </div>
