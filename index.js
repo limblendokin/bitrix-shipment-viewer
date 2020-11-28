@@ -135,7 +135,8 @@ app.use(session({
     saveUninitialized: true,
     store: sessionStore,
     cookie: {
-        maxAge: 1000 * 30
+        maxAge: 1000 * 30,
+        sameSite: 'strict'
     }
 }));
 
