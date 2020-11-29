@@ -17,7 +17,7 @@ const MongoStore = require('connect-mongo')(session);
 require('dotenv').config();
 // Create the Express application
 var app = express();
-app.use(helmet());
+//app.use(helmet());
 // app.use(cors({
 //     origin: 'http://localhost:4000/login',
 //     credentials:true
