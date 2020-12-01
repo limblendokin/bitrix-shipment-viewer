@@ -3,28 +3,47 @@ require('dotenv').config();
 const baseUrl = process.env.BITRIX_URL; 
 
 const getShipmentList = async () => {
-  var shipments = [];
   try{
-    shipments = await axios.get(`${baseUrl}sale.shipment.list`, {
-      params:{
-        "filter[allowDelivery]":"Y",
-        "filter[deducted]":"N",
-        "filter[statusId]":["DN"],
-        "select":["id", "deducted", "deliveryName", "statusId", "orderId", "trackingNumber", "deliveryId", "allowDelivery"]
-      }
-    });
-    shipments = shipments.data.result.shipments;
+    var shipments = [];
+    var next = 0;
+    do{
+      var res = await axios.get(`${baseUrl}sale.shipment.list`, {
+        params:{
+          "filter[allowDelivery]":"Y",
+          "filter[deducted]":"N",
+          "filter[statusId]":["DN", "DG", "DA"],
+          "select":[
+            "id", "deducted", "deliveryName", "statusId", 
+            "orderId", "trackingNumber", "deliveryId", "allowDelivery", "dateAllowDelivery"
+          ],
+          'start': next
+        }
+      });
+      next = res.data.next;
+      console.log(res.data.result.shipments);
+      shipments = shipments.concat(res.data.result.shipments);
+
+    }while(next);
+    
     var orderIds =[];
     for(let i=0; i<shipments.length; i++){
       var orderId = shipments[i].orderId
       orderIds.push(orderId);
     }
-    var items = await axios.get(`${baseUrl}sale.basketItem.list`,{
-      params:{
-        'filter[orderId]': orderIds,
-        'select':["detailPageUrl", "measureName", "name", "quantity", "orderId"]
-      }
-    });
+    next = 0;
+    var items = [];
+    do{
+      var res = await axios.get(`${baseUrl}sale.basketItem.list`,{
+        params:{
+          'filter[orderId]': orderIds,
+          'select':["detailPageUrl", "measureName", "name", "quantity", "orderId"],
+          'start': next
+        }
+      });
+      next = res.data.next;
+      console.log(res.data.result.basketItems);
+      items = items.concat(res.data.result.basketItems);
+    }while(next)
     // var trackingNumber = await axios.get(`${baseUrl}sale.order.list`,{
     //   params: {
     //     'filter[id]':orderIds,
@@ -32,7 +51,6 @@ const getShipmentList = async () => {
     //   }
     // })
     
-    items = items.data.result.basketItems;
     for(let i=0; i < shipments.length; i++){
       var orderId = shipments[i].orderId;
       var basket = items.filter(item => item.orderId == orderId);
@@ -43,6 +61,7 @@ const getShipmentList = async () => {
     console.log(err);
 
   }
+  console.log(shipments.length);
   return shipments;
 }
 
