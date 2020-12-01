@@ -17,36 +17,35 @@ function App() {
   }
 
   useEffect(() => {
-
-    const fetchData = async () => {
-      fetch(
-        `/api/shipment`,
-        {
-          credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json',}
-        }
-      ).then(res => res.json()).then(data => {
-        if(data.err) data = [];
-        setShipments(data);
-        var itemsArr=[];
-        for(let i = 0; i<data.length;i++){
-          var order = data[i];
-          for(let j = 0; j<order.items.length; j++){
-            let item = order.items[j]; 
-            let found = itemsArr.find(x => x.name===item.name);
-            if(found){
-              found.quantity+=Number.parseInt(item.quantity);
-            }
-            else{
-              var newItem = JSON.parse(JSON.stringify(item));
-              newItem.quantity = Number.parseInt(newItem.quantity);
-              itemsArr.push(newItem);
-
-            }
+  const fetchData = async () => {
+    fetch(
+      `/api/shipment`,
+      {
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json',}
+      }
+    ).then(res => res.json()).then(data => {
+      if(data.err) data = [];
+      data.sort((a,b)=> a.dateAllowDelivery > b.dateAllowDelivery ? 1 : -1);
+      setShipments(data);
+      var itemsArr=[];
+      for(let i = 0; i<data.length;i++){
+        var order = data[i];
+        for(let j = 0; j<order.items.length; j++){
+          let item = order.items[j]; 
+          let found = itemsArr.find(x => x.name===item.name);
+          if(found){
+            found.quantity+=Number.parseInt(item.quantity);
+          }
+          else{
+            var newItem = JSON.parse(JSON.stringify(item));
+            newItem.quantity = Number.parseInt(newItem.quantity);
+            itemsArr.push(newItem);
+            setItems(itemsArr);
           }
         }
-        setItems(itemsArr);
-      });
+      }
+    });
     };
     const fetchOrders = async () => {
       fetch(
@@ -118,35 +117,33 @@ function App() {
           <Table hover>
             <thead>
               <tr>
+                <th>Дата разрешения</th>
                 <th>Номер заказа</th>
                 <th>Статус</th>
                 <th>Способ доставки</th>
                 <th>Номер накладной</th>
                 <th>Товары</th>
-
+                <th>Количество</th>
+                <th>Ед.изм.</th>
               </tr>
             </thead>
             <tbody>
               {shipments.map(shipment => (
-
-                <tr key={shipment.id}>
-                  <td>812{shipment.orderId}</td>
-                  <td>{shipment.statusId}</td>
-                  <td>{shipment.deliveryName}</td>
-                  <td>{shipment.trackingNumber}</td>
-                  <Table>
-                    {shipment.items.map(item => (
-                      <tr>
-                        <td>
-                          <a href={smola20url+item.detailPageUrl}>{item.name}</a>
-                          </td>
-                        <td>{item.quantity}</td>
-                        <td>{item.measureName}</td>
-                      </tr>
-                    ))}
-                  </Table>
-                </tr>
-                    ))}
+                shipment.items.map(item => (
+                  <tr>
+                      <td>{shipment.dateAllowDelivery}</td>
+                      <td>812{shipment.orderId}</td>
+                      <td>{shipment.statusId}</td>
+                      <td>{shipment.deliveryName}</td>
+                      <td>{shipment.trackingNumber}</td>
+                      <td>
+                        <a href={smola20url+item.detailPageUrl}>{item.name}</a>
+                      </td>
+                      <td>{item.quantity}</td>
+                      <td>{item.measureName}</td>
+                  </tr>
+                ))
+              ))}
             </tbody>
           </Table>
         </TabPane>
@@ -156,6 +153,7 @@ function App() {
               <tr>
                 <th>Наименование</th>
                 <th>Количество</th>
+                <th>Ед.изм.</th>
               </tr>
             </thead>
             <tbody>
@@ -172,26 +170,6 @@ function App() {
           </Table>
         </TabPane>
         <TabPane tabId="3">
-          {/* <Table hover>
-            <thead>
-              <tr>
-                <th>Номер заказа</th>
-                <th>Дата</th>
-                <th>Сумма</th>
-
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map(order => (
-
-                <tr key={order.id}>
-                  <td>812{order.id}</td>
-                  <td>{order.dateInsert}</td>
-                  <td>{order.price}</td>
-                </tr>
-                    ))}
-            </tbody>
-          </Table> */}
         </TabPane>
       </TabContent>
     </div>
