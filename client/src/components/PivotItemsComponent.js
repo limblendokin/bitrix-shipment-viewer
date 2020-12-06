@@ -1,12 +1,13 @@
 import axios from 'axios';
 import React from 'react';
-import { Spinner, Row } from 'reactstrap';
-import ShipmentListComponent from './ShipmentListComponent';
+import { Container, Row, Spinner } from 'reactstrap';
+import ItemListComponent from './ItemListComponent';
 import StatusIdFilterComponent from './StatusIdFilterComponent';
-function ShipmentsComponent(props) {
-  const [stages, setStages] = React.useState(['DN']);
+function PivotItemsComponent(props) {
+  const [stages, setStages] = React.useState(['DA']);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState({});
+  const [items, setItems] = React.useState([]);
   const handleCheck = (e) => {
     if (e.target.checked) {
       setStages(stages.concat(e.target.name));
@@ -18,24 +19,18 @@ function ShipmentsComponent(props) {
     e.preventDefault();
     fetchData();
   };
-  const [shipments, setShipments] = React.useState([]);
   const fetchData = async () => {
     setIsLoading(true);
     axios
-      .post('/api/shipment', { stages })
+      .post('/api/items', { stages })
       .then((res) => {
-        let data = res.data;
-        data.sort((a, b) =>
-          a.dateAllowDelivery > b.dateAllowDelivery ? 1 : -1
-        );
-        setShipments(() => data);
+        setItems(res.data);
         setError({});
         setIsLoading(false);
       })
       .catch((err) => {
-        console.log(err);
         setError(err.response);
-        setIsLoading(false);
+        console.log(err);
       });
   };
   React.useEffect(() => {
@@ -48,6 +43,7 @@ function ShipmentsComponent(props) {
         onSubmit={filterShipments}
         stages={stages}
       />
+
       {isLoading ? (
         <Row className="h-100 align-items-center justify-content-center">
           <Spinner></Spinner>
@@ -55,9 +51,9 @@ function ShipmentsComponent(props) {
       ) : error.data ? (
         <div className="alert alert-danger">{error.data}</div>
       ) : (
-        <ShipmentListComponent shipments={shipments} />
+        <ItemListComponent items={items} />
       )}
     </>
   );
 }
-export default ShipmentsComponent;
+export default PivotItemsComponent;

@@ -1,178 +1,76 @@
-import React, {useState, useEffect} from 'react';
-//import axios from 'axios';
+import React, { useEffect } from 'react';
 import './App.css';
-import {Button, Form, FormGroup, Input, Label, Table, TabContent, TabPane, Nav, NavItem, NavLink} from 'reactstrap';
-import classnames from 'classnames';
+import ShipmentsComponent from './components/ShipmentsComponent';
+import { Spinner, Container, Row, Col } from 'reactstrap';
+import LoginComponent from './components/LoginComponent';
+import axios from 'axios';
+import NavBarComponent from './components/NavBarComponent';
+import PivotItemsComponent from './components/PivotItemsComponent';
 
 function App() {
-  const [username, setUsername] = React.useState("");
-  const [userPassword, setUserPassword] = React.useState("");
-  const [shipments, setShipments] = React.useState([]);
-  const [orders, setOrders] = React.useState([]);
-  const smola20url = 'https://smola20.ru';
-  const [activeTab, setActiveTab] = useState('1');
-  const [items, setItems] = React.useState([]);
-  const toggle = tab => {
-    if(activeTab !== tab) setActiveTab(tab);
-  }
-
-  useEffect(() => {
-  const fetchData = async () => {
-    fetch(
-      `/api/shipment`,
-      {
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json',}
-      }
-    ).then(res => res.json()).then(data => {
-      if(data.err) data = [];
-      data.sort((a,b)=> a.dateAllowDelivery > b.dateAllowDelivery ? 1 : -1);
-      setShipments(data);
-      var itemsArr=[];
-      for(let i = 0; i<data.length;i++){
-        var order = data[i];
-        for(let j = 0; j<order.items.length; j++){
-          let item = order.items[j]; 
-          let found = itemsArr.find(x => x.name===item.name);
-          if(found){
-            found.quantity+=Number.parseInt(item.quantity);
-          }
-          else{
-            var newItem = JSON.parse(JSON.stringify(item));
-            newItem.quantity = Number.parseInt(newItem.quantity);
-            itemsArr.push(newItem);
-            setItems(itemsArr);
-          }
-        }
-      }
-    });
-    };
-    const fetchOrders = async () => {
-      fetch(
-        `/api/orders`,
-        {
-          credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json',}
-        }
-      ).then(res => res.json()).then(data => {
-        setOrders(data?data:[]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [user, setUser] = React.useState('');
+  const [currentView, setCurrentView] = React.useState('shipments');
+  const onChangeView = (viewName) => {
+    setCurrentView(viewName);
+  };
+  const onLogin = (user) => {
+    setUser(user);
+  };
+  const onLogout = () => {
+    axios
+      .get('/api/logout')
+      .then((res) => {
+        setUser('');
       })
-    }
-    fetchData();
-    fetchOrders();
+      .catch((err) => console.log(err));
+  };
+  const getLoginState = async () => {
+    axios
+      .get('/api/me')
+      .then((res) => {
+        if (!res.data.err) {
+          setUser(res.data);
+        }
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+      });
+  };
+  useEffect(() => {
+    getLoginState();
   }, []);
+  if (isLoading) {
+    return (
+      <Container className="h-100">
+        <Row className="h-100 align-items-center justify-content-center">
+          <Spinner color="dark"></Spinner>
+        </Row>
+      </Container>
+    );
+  }
+  if (!user) {
+    return (
+      <Container className="h-100">
+        <Row className="h-100 align-items-center justify-content-center">
+          <LoginComponent onLogin={onLogin} />
+        </Row>
+      </Container>
+    );
+  }
   return (
-    <div>
-      <Form inline className="m-3" onSubmit={async e=>{
-          e.preventDefault();
-          fetch(`/api/login`, 
-          {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/json'},
-            body: JSON.stringify({
-              username: username,
-              password: userPassword
-            })
-          });
-        }}>
-        <FormGroup inline className="mb-2 mr-sm-2 mb-sm-0">
-          <Label for="exampleEmail" className="mr-sm-2">Email</Label>
-          <Input type="username" name="username" id="username" placeholder="something" value={username} onChange={e=>setUsername(e.target.value)}/>
-        </FormGroup>
-        <FormGroup inline className="mb-2 mr-sm-2 mb-sm-0">
-          <Label for="examplePassword" className="mr-sm-2">Password</Label>
-          <Input type="password" name="userPassword" id="userPassword" placeholder="don't tell!" value={userPassword} onChange={e=>setUserPassword(e.target.value)}/>
-        </FormGroup>
-        <Button type="submit">Submit</Button>
-      </Form>
-      <Nav tabs>
-        <NavItem>
-          <NavLink
-            className={classnames({ active: activeTab === '1' })}
-            onClick={() => { toggle('1'); }}
-          >
-            Отгрузки
-          </NavLink>
-        </NavItem>
-        <NavItem>
-          <NavLink
-            className={classnames({ active: activeTab === '2' })}
-            onClick={() => { toggle('2'); }}
-          >
-            Товары в отгрузках
-          </NavLink>
-        </NavItem>
-        <NavItem>
-          <NavLink
-            className={classnames({ active: activeTab === '3' })}
-            onClick={() => { toggle('3'); }}
-          >
-            Оплаченные заказы
-          </NavLink>
-        </NavItem>
-      </Nav>
-      <TabContent activeTab={activeTab}>
-        <TabPane tabId="1">
-          <Table hover>
-            <thead>
-              <tr>
-                <th>Дата разрешения</th>
-                <th>Номер заказа</th>
-                <th>Статус</th>
-                <th>Способ доставки</th>
-                <th>Номер накладной</th>
-                <th>Товары</th>
-                <th>Количество</th>
-                <th>Ед.изм.</th>
-              </tr>
-            </thead>
-            <tbody>
-              {shipments.map(shipment => (
-                shipment.items.map(item => (
-                  <tr>
-                      <td>{shipment.dateAllowDelivery}</td>
-                      <td>812{shipment.orderId}</td>
-                      <td>{shipment.statusId}</td>
-                      <td>{shipment.deliveryName}</td>
-                      <td>{shipment.trackingNumber}</td>
-                      <td>
-                        <a href={smola20url+item.detailPageUrl}>{item.name}</a>
-                      </td>
-                      <td>{item.quantity}</td>
-                      <td>{item.measureName}</td>
-                  </tr>
-                ))
-              ))}
-            </tbody>
-          </Table>
-        </TabPane>
-        <TabPane tabId="2">
-          <Table hover>
-            <thead>
-              <tr>
-                <th>Наименование</th>
-                <th>Количество</th>
-                <th>Ед.изм.</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map(item => (
-                <tr>
-                  <td>
-                    <a href={smola20url+item.detailPageUrl}>{item.name}</a>
-                  </td>
-                  <td>{item.quantity}</td>
-                  <td>{item.measureName}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </TabPane>
-        <TabPane tabId="3">
-        </TabPane>
-      </TabContent>
-    </div>
+    <>
+      <NavBarComponent
+        user={user}
+        onChangeView={onChangeView}
+        onLogout={onLogout}
+      />
+      <div className="m-auto w-75 h-100">
+        {currentView === 'shipments' && <ShipmentsComponent />}
+        {currentView === 'items' && <PivotItemsComponent />}
+      </div>
+    </>
   );
 }
 
