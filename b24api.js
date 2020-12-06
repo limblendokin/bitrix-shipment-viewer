@@ -121,21 +121,19 @@ const setStage = async (fields) => {
   if (!(id && statusId && allowDelivery && deducted && deliveryId)) {
     throw new Error('not enough args');
   }
-  axios
-    .get(`${baseUrl}sale.shipment.update`, {
-      params: {
-        id: id,
-        'fields[deducted]': deducted,
-        'fields[allowDelivery]': allowDelivery,
-        'fields[deliveryId]': deliveryId,
-        'fields[statusId]': statusId,
-      },
-    })
-    .then((res) => {
-      console.log(res.data);
-      return res.data;
-    })
-    .catch((err) => console.log(err));
+  var res = await axios.get(`${baseUrl}sale.shipment.update`, {
+    params: {
+      id: id,
+      'fields[deducted]': deducted,
+      'fields[allowDelivery]': allowDelivery,
+      'fields[deliveryId]': deliveryId,
+      'fields[statusId]': statusId,
+    },
+  });
+  if (!res.data.result) {
+    throw new Error('update failed');
+  }
+  return res.data.result.shipment;
 };
 module.exports = {
   getShipmentList,

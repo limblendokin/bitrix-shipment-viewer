@@ -16,7 +16,11 @@ function ShipmentsComponent(props) {
   };
   const filterShipments = (e) => {
     e.preventDefault();
-    fetchData();
+    if (stages.length > 0) {
+      fetchData();
+    } else {
+      setShipments([]);
+    }
   };
   const [shipments, setShipments] = React.useState([]);
   const fetchData = async () => {
@@ -42,7 +46,7 @@ function ShipmentsComponent(props) {
     fetchData();
   }, []);
   return (
-    <>
+    <div>
       <StatusIdFilterComponent
         onCheck={handleCheck}
         onSubmit={filterShipments}
@@ -55,9 +59,12 @@ function ShipmentsComponent(props) {
       ) : error.data ? (
         <div className="alert alert-danger">{error.data}</div>
       ) : (
-        <ShipmentListComponent shipments={shipments} />
+        <ShipmentListComponent
+          shipments={shipments}
+          setShipments={setShipments}
+        />
       )}
-    </>
+    </div>
   );
 }
 export default ShipmentsComponent;

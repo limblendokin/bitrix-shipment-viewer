@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import './App.css';
 import ShipmentsComponent from './components/ShipmentsComponent';
-import { Spinner, Container, Row, Col } from 'reactstrap';
+import { Spinner, Container, Row } from 'reactstrap';
 import LoginComponent from './components/LoginComponent';
 import axios from 'axios';
 import NavBarComponent from './components/NavBarComponent';
 import PivotItemsComponent from './components/PivotItemsComponent';
+import FooterComponent from './components/FooterComponent';
 
 function App() {
   const [isLoading, setIsLoading] = React.useState(true);
@@ -60,17 +61,18 @@ function App() {
     );
   }
   return (
-    <>
+    <div className=" h-100">
       <NavBarComponent
         user={user}
         onChangeView={onChangeView}
         onLogout={onLogout}
       />
-      <div className="m-auto w-75 h-100">
+      <div className="m-auto w-75 min-vh-100">
         {currentView === 'shipments' && <ShipmentsComponent />}
         {currentView === 'items' && <PivotItemsComponent />}
       </div>
-    </>
+      <FooterComponent />
+    </div>
   );
 }
 

@@ -236,8 +236,15 @@ app.get('/api/me', (req, res) => {
 });
 app.post('/api/shipment/stage', (req, res) => {
   if (req.isAuthenticated()) {
-    console.log(req.body);
-    b24api.setStage(req.body);
+    b24api
+      .setStage(req.body)
+      .then((data) => {
+        res.json(data);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ err: 'update failed' });
+      });
   } else {
     res.status(401).json({ err: 'not authenticated' });
   }
@@ -247,6 +254,7 @@ app.post('/api/shipment', (req, res, next) => {
     b24api
       .getShipmentListWithBaskets(req.body.stages)
       .then((result) => res.send(result));
+    // res.send(require('./testing').shipments);
   } else {
     res.status(401).json({ err: 'not authenticated' });
   }
@@ -256,6 +264,7 @@ app.post('/api/items', (req, res, next) => {
     b24api
       .getItems({ stages: req.body.stages, orderIds: req.body.orderIds })
       .then((result) => res.send(result));
+    // res.send(require('./testing').items);
   } else {
     res.status(401).json({ err: 'not authenticated' });
   }

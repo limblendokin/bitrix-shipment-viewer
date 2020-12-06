@@ -5,13 +5,16 @@ import { smola20url } from '../config';
 import ItemListComponent from './ItemListComponent';
 function ShipmentListComponent(props) {
   const shipments = props.shipments;
+  const setShipments = props.setShipments;
   const getLocaleDate = (isoString) => {
     let date = new Date(isoString);
     let now = new Date();
     if (now.toLocaleDateString() === date.toLocaleDateString()) {
-      return date.toLocaleTimeString();
+      return date.toLocaleTimeString('ru');
     } else {
-      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+      return (
+        date.toLocaleDateString('ru') + ' ' + date.toLocaleTimeString('ru')
+      );
     }
   };
   const getShipmentURL = (deliveryId, orderId) => {
@@ -25,9 +28,25 @@ function ShipmentListComponent(props) {
       return '#';
     }
   };
-  const setStage = (shipment) => {
-    shipment.statusId = 'DA';
-    axios.post('/api/shipment/stage', shipment);
+  const setStage = (shipment, e) => {
+    e.target.disabled = true;
+    let updatedShipment = { ...shipment, statusId: 'DA' };
+    axios.post('/api/shipment/stage', updatedShipment).then((res) => {
+      e.target.disabled = false;
+      let newShipment = res.data;
+      console.log(newShipment);
+      setShipments(
+        shipments.map((item) => {
+          if (item.id !== newShipment.id) {
+            return item;
+          }
+          return {
+            ...item,
+            statusId: newShipment.statusId,
+          };
+        })
+      );
+    });
   };
   return (
     <Table responsive>
@@ -56,7 +75,7 @@ function ShipmentListComponent(props) {
           return (
             <tr key={id}>
               <td>
-                <Button onClick={() => setStage(shipment)}>В сборку</Button>
+                <Button onClick={(e) => setStage(shipment, e)}>В сборку</Button>
               </td>
               <td>{getLocaleDate(dateAllowDelivery)}</td>
               <td>

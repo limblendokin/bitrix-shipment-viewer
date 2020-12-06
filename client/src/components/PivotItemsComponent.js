@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React from 'react';
-import { Container, Row, Spinner } from 'reactstrap';
+import { Row, Spinner } from 'reactstrap';
 import ItemListComponent from './ItemListComponent';
 import StatusIdFilterComponent from './StatusIdFilterComponent';
 function PivotItemsComponent(props) {
@@ -17,7 +17,11 @@ function PivotItemsComponent(props) {
   };
   const filterShipments = (e) => {
     e.preventDefault();
-    fetchData();
+    if (stages.length > 0) {
+      fetchData();
+    } else {
+      setItems([]);
+    }
   };
   const fetchData = async () => {
     setIsLoading(true);
