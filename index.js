@@ -2,9 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
 var passport = require('passport');
-const cors = require('cors');
-const helmet = require('helmet');
 var crypto = require('crypto');
+const path = require('path');
 const b24api = require('./b24api');
 var LocalStrategy = require('passport-local').Strategy;
 // Package documentation - https://www.npmjs.com/package/connect-mongo
@@ -17,7 +16,6 @@ const MongoStore = require('connect-mongo')(session);
 require('dotenv').config();
 // Create the Express application
 var app = express();
-//app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 /**
