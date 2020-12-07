@@ -21,12 +21,14 @@ function ShipmentListComponent(props) {
     return `${smola20url}bitrix/admin/sale_order_shipment_edit.php?order_id=${orderId}&shipment_id=${deliveryId}`;
   };
   const getDispatchBlankLink = (trackingString) => {
+    if (!trackingString) {
+      return '#';
+    }
     var [dispatchCompany, dispatchId] = trackingString.split(' ');
     if (dispatchCompany === 'CDEK') {
       return `https://lk.cdek.ru/print/print-order?numberOrd=${dispatchId}`;
-    } else {
-      return '#';
     }
+    return '#';
   };
   const setStage = (shipment, e) => {
     e.target.disabled = true;
